@@ -15,8 +15,16 @@ def mkdir(path):
         if e.errno != errno.EEXIST:
             raise
 
-def get_klass(rec):
-    return rec['meta']['clinical']['benign_malignant']
+def get_klass(rec, f=None):
+    r = rec['meta']['clinical']
+    if r is not None:
+        if 'benign_malignant' in r:
+            return r['benign_malignant']
+        else:
+            print("Skipping %s" % f)
+            return None
+    else:
+        return None
 
 def get_image_name(lab, path=None):
     s = path + '/Images/' + os.path.basename(lab) + '.jpg'
@@ -34,11 +42,15 @@ def main(path='./Data'):
     # for f in tqdm(fs):
     for f in fs:
         cont = yaml.load(open(f))
-        klass = get_klass(cont)
-        img = get_image_name(f, path='../..')
-        new_name = join(train_path, klass, os.path.basename(img))
-        if not os.path.isfile(new_name):
-            print(img, new_name)
-            os.symlink(img, new_name)
+        klass = get_klass(cont, f=f)
+        if klass is not None:
+            img = get_image_name(f, path='../..')
+            new_name = join(train_path, klass, os.path.basename(img))
+            if not os.path.isfile(new_name):
+                if os.path.isfile(img):
+                    print(img, new_name)
+                    os.symlink(img, new_name)
+                else:
+                    print("Image not found: %s" % img)
 
 main()
