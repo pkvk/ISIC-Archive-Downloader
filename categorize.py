@@ -2,7 +2,7 @@
 corresponding to each of the three label categories:
 benign, malignant, and indeterminate.
 """
-import yaml
+import json
 from glob import glob
 import os, errno
 from os.path import join
@@ -41,7 +41,7 @@ def main(path='./Data'):
     fs = glob(path + '/Descriptions/*')
     # for f in tqdm(fs):
     for f in fs:
-        cont = yaml.load(open(f))
+        cont = json.load(open(f))
         klass = get_klass(cont, f=f)
         if klass is not None:
             img = get_image_name(f, path='../..')
